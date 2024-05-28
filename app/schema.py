@@ -43,7 +43,36 @@ class AddNewUser(graphene.Mutation):
         return AddNewUser(user=new_user)
 
 
+class UpdateUser(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        username = graphene.String()
+        email = graphene.String()
+
+    user = graphene.Field(UserType)
+
+    def mutate(roote, info, user_id, username=None, email=None):
+        # Query db for user with user_id
+        user = db.session.get(UserModel, user_id)
+        # If no user with user_id, return None
+        if user is None:
+            return None
+        # If the username argument
+        if username:
+            # Set the user's username to the username arg
+            user.username = username
+        # If the email argument
+        if email:
+            # Set the user's email to the email arg
+            user.email = email
+        # Commit any changes to the database
+        db.session.commit()
+        # Return the updated user as the "user" field output
+        return UpdateUser(user=user)
+
+
 class Mutation(graphene.ObjectType):
     add_new_user = AddNewUser.Field()
+    update_user = UpdateUser.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
