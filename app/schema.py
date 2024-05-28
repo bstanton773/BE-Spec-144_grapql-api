@@ -1,11 +1,17 @@
 import graphene
+from graphene_sqlalchemy import SQLAlchemyObjectType
+from app.models import User as UserModel, db
 
+
+class UserType(SQLAlchemyObjectType):
+    class Meta:
+        model = UserModel
 
 class Query(graphene.ObjectType):
-    test = graphene.String()
+    users = graphene.List(UserType)
 
-    def resolve_test(root, info):
-        return 'This is a string that I wrote and am returning to you now'
+    def resolve_users(root, info):
+        return db.session.execute(db.select(UserModel)).scalars()
     
 
 
