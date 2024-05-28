@@ -24,3 +24,6 @@ class User(Base):
         # Add the new instance of User to the database
         db.session.add(self)
         db.session.commit()
+
+    def __repr__(self):
+        return f"<User {self.id}|{self.username}>"
