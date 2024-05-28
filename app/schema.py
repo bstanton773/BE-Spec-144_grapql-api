@@ -70,9 +70,33 @@ class UpdateUser(graphene.Mutation):
         # Return the updated user as the "user" field output
         return UpdateUser(user=user)
 
+# Create a Mutation for Deleting a User. 
+# Take in a user_id argument, find the user with that ID, delete user from database, 
+# return field "message" - graphene.String() - "success" if user deleted "user does not exist" if no user
+class DeleteUser(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+
+    message = graphene.String()
+
+    def mutate(root, info, user_id):
+        # Get the user from the database with the id
+        user = db.session.get(UserModel, user_id)
+        # If there is no user with that ID
+        if user is None:
+            # the "message" field should return "user does not exist"
+            return DeleteUser(message=f"User with ID {user_id} does not exist")
+        # If the user does exist
+        else:
+            # Remove the user from the database
+            db.session.delete(user)
+            db.session.commit()
+            return DeleteUser(message="success")
+        
 
 class Mutation(graphene.ObjectType):
     add_new_user = AddNewUser.Field()
     update_user = UpdateUser.Field()
+    delete_user = DeleteUser.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
